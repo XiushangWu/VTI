@@ -81,10 +81,7 @@ def frechet_distance(original_trajectory, imputed_trajectory):
 
     for i in range(1, P_len):
         for j in range(1, Q_len):
-            dp[i, j] = max(min(dp[i - 1, j], 
-                               dp[i, j - 1], 
-                               dp[i - 1, j - 1]), 
-                               dist_matrix[i, j])
+            dp[i, j] = max(min(dp[i - 1, j], dp[i, j - 1], dp[i - 1, j - 1]), dist_matrix[i, j])
 
     normalized_frechet = normalize_distance(dp[-1, -1], P_len, Q_len)
     return normalized_frechet
@@ -92,9 +89,9 @@ def frechet_distance(original_trajectory, imputed_trajectory):
 
 
 def compare_imputed(imputed_trajectory_path, original_trajectory_path, node_dist_threshold, edge_dist_threshold, cog_angle_threshold, path, type):
-    output_directory  = os.path.join(os.path.dirname(os.path.dirname(__file__)), f'data//stats//evaluation//raw//{type}//{path}')
+    output_directory  = os.path.join(os.path.dirname(os.path.dirname(__file__)), f'data//stats//evaluation//all//{type}//{path}')
     os.makedirs(output_directory, exist_ok=True)
-    stats_file = os.path.join(output_directory, f'tester_exam.csv')
+    stats_file = os.path.join(output_directory, f'imputedR_evaluation.csv')
     
     original_files = {}
     for root, dirs, files in os.walk(original_trajectory_path):
@@ -117,7 +114,7 @@ def compare_imputed(imputed_trajectory_path, original_trajectory_path, node_dist
                         ofile_path = original_files[base_name]
                         print(f"Found DGIVT file: matching file {file_counter}")
                         
-                        imputed_trajectory = load_geojson_extract_coordinates(file_path)
+                        imputed_trajectory = process_imputated_trajectory(file_path)
                         original_trajectory = load_csv_extract_coordinates(ofile_path)
                         
                         original_len = len(original_trajectory)

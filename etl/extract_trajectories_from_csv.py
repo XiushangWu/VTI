@@ -13,7 +13,7 @@ from utils import get_radian_and_radian_diff_columns, calculate_initial_compass_
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 HARBORS_FILE = os.path.join(DATA_FOLDER, 'harbors.csv')
 AIS_CSV_FOLDER = os.path.join(DATA_FOLDER, 'ais_csv')
-GRAPH_INPUT_FOLDER = os.path.join(DATA_FOLDER, 'graph_input')
+GRAPH_INPUT_FOLDER = os.path.join(DATA_FOLDER, 'imputation_input')
 STATISTIC_FOLDER = os.path.join(DATA_FOLDER, 'stats')
 STATISTIC_JSON_FILE = os.path.join(STATISTIC_FOLDER, 'stats.ndjson')
 CSV_EXTRACT_FILE_LOG = 'ais_extraction_log.txt'

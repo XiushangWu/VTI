@@ -5,7 +5,7 @@ import networkx as nx
 import numpy as np
 from sqlalchemy import Tuple
 from data.logs.logging import setup_logger
-from utils import haversine_distance, heuristics, adjust_edge_weights_for_draught, nodes_within_radius, nodes_to_geojson, edges_to_geojson, interpolate_path, nodes_to_geojson_imputed
+from utils import haversine_distance, heuristics, adjust_edge_weights_for_draught, nodes_within_radius, nodes_to_geojson, edges_to_geojson
 import time
 import numpy as np
 import pandas as pd
@@ -20,6 +20,8 @@ from pathlib import Path
 
 LOG_PATH = 'imputation_log.txt'
 IMPUTATION_OUTPUT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data//output_imputation')
+#IMPUTATION_OUTPUT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data//txt_data_25_trajectories//20240831//data_multiple_imputed') # imputed trajectory
+
 OUTPUT_FOLDER_RAW = os.path.join(IMPUTATION_OUTPUT, 'raw')
 OUTPUT_FOLDER_PROCESSED = os.path.join(IMPUTATION_OUTPUT, 'processed')
 
@@ -97,6 +99,8 @@ def find_relevant_cells(trajectory_points, cells_df):
                 relevant_cell_ids.add(row['cell_id'])
     return list(relevant_cell_ids)
 
+
+
 def revert_graph_changes(G, added_nodes, added_edges):
     for edge in added_edges:
         if G.has_edge(*edge):
@@ -104,6 +108,7 @@ def revert_graph_changes(G, added_nodes, added_edges):
     for node in added_nodes:
         if G.has_node(node):
             G.remove_node(node)
+
 
 def generate_output_files_and_stats(G, imputed_paths, file_name, type, size, node_dist_threshold, edge_dist_threshold, cog_angle_threshold, trajectory_points, execution_time, add_execution_time):
     unique_nodes = []
@@ -119,8 +124,11 @@ def generate_output_files_and_stats(G, imputed_paths, file_name, type, size, nod
             edges.append((path[i], path[i+1]))
 
     # Output path construction and file writing
-    imputation_output_path = os.path.join(OUTPUT_FOLDER_RAW, f'tester/{type}/{size}/{node_dist_threshold}_{edge_dist_threshold}_{cog_angle_threshold}/{file_name}')
-    refined_output_path = os.path.join(OUTPUT_FOLDER_PROCESSED, f'tester/{type}/{size}/{node_dist_threshold}_{edge_dist_threshold}_{cog_angle_threshold}/{file_name}')
+    # imputation_output_path = os.path.join(OUTPUT_FOLDER_RAW, f'fishing/{type}/{size}/{node_dist_threshold}_{edge_dist_threshold}_{cog_angle_threshold}/{file_name}')
+    imputation_output_path = os.path.join(OUTPUT_FOLDER_RAW, f'cargo/{type}/{size}/{node_dist_threshold}_{edge_dist_threshold}_{cog_angle_threshold}/{file_name}')
+
+    # refined_output_path = os.path.join(OUTPUT_FOLDER_PROCESSED, f'fishing/{type}/{size}/{node_dist_threshold}_{edge_dist_threshold}_{cog_angle_threshold}/{file_name}')
+    refined_output_path = os.path.join(OUTPUT_FOLDER_PROCESSED, f'cargo/{type}/{size}/{node_dist_threshold}_{edge_dist_threshold}_{cog_angle_threshold}/{file_name}')
 
     if not os.path.exists(imputation_output_path):
         os.makedirs(imputation_output_path)
@@ -128,8 +136,9 @@ def generate_output_files_and_stats(G, imputed_paths, file_name, type, size, nod
     # GeoJSON output
     imputed_nodes_file_path = os.path.join(imputation_output_path, f'{file_name}_nodes.geojson')
     imputed_edges_file_path = os.path.join(imputation_output_path, f'{file_name}_edges.geojson')
-    nodes_to_geojson_imputed(G, list(unique_nodes), imputed_nodes_file_path)
+    nodes_to_geojson(G, list(unique_nodes), imputed_nodes_file_path)
     edges_to_geojson(G, edges, imputed_edges_file_path)
+
 
     # Statistics
     stats = {
@@ -224,29 +233,22 @@ def find_and_impute_paths(G, trajectory_points, file_name, node_dist_threshold, 
         direct_path_exists = G.has_edge(start_point, end_point)
 
         if direct_path_exists:
-            # to avoid adding the first point again, if it is already in the path
             path = [start_point, end_point]
-            interpolated_path = interpolate_path(path, start_props, end_props)
-            imputed_paths.append(interpolated_path)
+            imputed_paths.append(path)
         else:
             try:
                 start_draught = start_props["draught"]
                 #GG = adjust_edge_weights_for_draught(G, start_point, end_point, tree, node_positions, start_draught)
                 path = nx.astar_path(G, start_point, end_point, heuristic=heuristics, weight='weight')
-              
-                interpolated_path = interpolate_path(path, start_props, end_props)
-                imputed_paths.append(interpolated_path)
-
-                    
+                imputed_paths.append(path)
             except nx.NetworkXNoPath:
                 path = [start_point, end_point]
-                interpolated_path = interpolate_path(path, start_props, end_props)
-                imputed_paths.append(interpolated_path)
-
+                imputed_paths.append(path)
+                
     end_time = time.time()
     execution_time = end_time - start_time 
     print(f"Imputation took: {add_execution_time + execution_time} \n")
-    
+
     generate_output_files_and_stats(G, imputed_paths, file_name, type, size, node_dist_threshold, edge_dist_threshold, cog_angle_threshold, trajectory_points, execution_time, add_execution_time)
     
     revert_graph_changes(G, added_nodes, added_edges)

@@ -76,6 +76,7 @@ def nodes_to_geojson(G, nodes, file_path):
     features = []    
     for node in nodes:
         node_properties = G.nodes[node]
+
         feature = {
             "type": "Feature",
             "geometry": {
@@ -91,32 +92,6 @@ def nodes_to_geojson(G, nodes, file_path):
         "features": features
     }
     
-    with open(file_path, 'w') as f:
-        json.dump(geojson, f)
-
-def nodes_to_geojson_imputed(G, nodes, file_path):
-    features = []    
-    for node in nodes:
-        node_properties = G.nodes[(node[0],node[1])]
-        feature = {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [node[1], node[0]],
-                "timestamp": node[2],
-                "sog": node[3],
-                "cog": node[4],
-                "draught": node[5],
-                "ship_type": node[6]
-            },
-            "properties": node_properties
-        }
-        features.append(feature)
-    
-    geojson = {
-        "type": "FeatureCollection",
-        "features": features
-    }
     with open(file_path, 'w') as f:
         json.dump(geojson, f)
 
@@ -319,30 +294,3 @@ def adjusted_distance(x, y):
     haversine_dist = np.sqrt(haversine_dist ** 2 + (THETA_ANGLE_PENALTY * cog_diff /180) ** 2)
 
     return haversine_dist
-
-
-def interpolate_path(path, start_props, end_props):
-    n = len(path)
-    draught, ship_type = start_props['draught'], start_props['ship_type']
-    distances = np.zeros(n-1)
-    for i in range(0, n-1):
-        distances[i] = geodesic(path[i], path[i+1]).meters
-    
-    total_path_distance = np.sum(distances)
-
-    cumulative_distances = np.cumsum(distances)
-
-    updated_path = []
-    updated_path.append((path[0][0], path[0][1], start_props['timestamp'], start_props['sog'], start_props['cog'], draught, ship_type))
-
-     # Interpolate values for each intermediate point
-    for i in range(1, n-1):
-        ratio = cumulative_distances[i-1] / total_path_distance
-        timestamp = start_props['timestamp'] + ratio * (end_props['timestamp'] - start_props['timestamp'])
-        sog = start_props['sog'] + ratio * (end_props['sog'] - start_props['sog'])
-        cog = start_props['cog'] + ratio * (end_props['cog'] - start_props['cog'])
-        updated_path.append((path[i][0], path[i][1], timestamp, sog, cog, draught, ship_type))
-
-    updated_path.append((path[-1][0], path[-1][1], end_props['timestamp'], end_props['sog'], end_props['cog'], draught, ship_type))
-
-    return updated_path

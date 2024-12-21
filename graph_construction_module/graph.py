@@ -17,7 +17,7 @@ from utils import calculate_bearing_difference, export_graph_to_geojson, haversi
     Graph input in the form of trajectory points extracted from the raw AIS data
 """
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
-GRAPH_INPUT = os.path.join(DATA_FOLDER, 'graph_input')
+GRAPH_INPUT = os.path.join(DATA_FOLDER, 'input_graph_cells')
 GRAPH_OUTPUT = os.path.join(DATA_FOLDER, 'output_graph')
 STATS_OUTPUT = os.path.join(DATA_FOLDER, 'stats')
 LOG_PATH = 'graph_log.txt'

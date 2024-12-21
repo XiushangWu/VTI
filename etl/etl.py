@@ -80,15 +80,15 @@ def extract_csv_file(file_name: str):
     Downloads the given file, runs it through the pipeline and adds the file to the log.
     :param filename: The file to be downloaded, cleansed and inserted
     """
-    download_file_from_ais_web_server(file_name)
+    download_file_from_ais_web_server(filename)
 
     try:
-        if ".zip" in file_name: 
-            file_name = file_name.replace('.zip', '.csv')
+        if ".zip" in filename: 
+            filename = filename.replace('.zip', '.csv')
         else:
-            file_name = file_name.replace('.rar', '.csv')
+            filename = filename.replace('.rar', '.csv')
         
-        csv_filepath = os.path.join(AIS_CSV_FOLDER, file_name)
+        csv_filepath = os.path.join(AIS_CSV_FOLDER, filename)
         stats.filepath = csv_filepath
 
         # Step 1: Read CSV
@@ -107,11 +107,11 @@ def extract_csv_file(file_name: str):
         create_trajectories_files(df)
         stats.add_to_file(STATISTIC_JSON_FILE)
 
-        logging.info(f'Finished creating trajectories for {file_name}')
+        logging.info(f'Finished creating trajectories for {filename}')
         os.remove(csv_filepath)
                 
     except Exception as e:
-        logging.error(f'Failed to extract file {file_name} with error message: {repr(e)}')
+        logging.error(f'Failed to extract file {filename} with error message: {repr(e)}')
         quit()
 
 def download_file_from_ais_web_server(filename: str):
@@ -150,4 +150,4 @@ def download_file_from_ais_web_server(filename: str):
         logging.exception(f'Failed with error: {e}')
         quit()
 
-get_csv_files_in_interval("2024-05-01::2024-05-03")
+get_csv_files_in_interval("2023-03-01::2024-04-01")
