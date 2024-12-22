@@ -182,7 +182,18 @@ def add_nodes_and_edges(G, trajectory_points, edge_dist_threshold):
             G.add_node(end_point, **end_props)
             added_nodes.append(end_point)
 
-    node_positions = np.array([(data['latitude'], data['longitude']) for node, data in G.nodes(data=True)])
+    # node_positions = np.array([(data['latitude'], data['longitude']) for node, data in G.nodes(data=True)])
+    node_positions = []
+    # 遍历图G的每个节点及其对应的属性数据
+    for node, data in G.nodes(data=True):
+        if 'latitude' in data and 'longitude' in data:
+            latitude = data['latitude']
+            longitude = data['longitude']
+            node_positions.append((latitude, longitude))
+        else:
+            print('no latitude or longitude' + data)
+    node_positions = np.array(node_positions)
+
     tree = cKDTree(node_positions)
 
     for i in range(len(trajectory_points) - 1):
