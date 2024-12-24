@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from graph_construction_module.graph import create_graphs_for_cells, process_all_cells
-from imputation_module.imputation import load_graphs_and_impute_trajectory, load_intersecting_graphs_and_impute_trajectory
+from imputation_module.imputation_v2 import load_graphs_and_impute_trajectory, load_intersecting_graphs_and_impute_trajectory
 from evaluation.compare import compare_linear, compare_imputed, compare_gti
 from copy import deepcopy
 import networkx as nx
@@ -53,16 +53,20 @@ def load_complete_graph(graph_path):
         
         # If both files are found, load them into a graph and merge it with the main graph
         if node_file and edge_file:
+            print("begin graph read node_file:{}".format(node_file))
             G_sub = create_graph_from_geojson(node_file, edge_file)
             G = nx.compose(G, G_sub)  # Merge the current subgraph into the main graph
-            break
+            print("end graph read node_file:{} ".format(node_file))
 
     return G
 
 def load_all_graph_process_trajectories(type, size, sparse_trajectories, graph_path, node_dist_threshold, edge_dist_threshold, cog_angle_threshold):
 
-    original_graph = load_complete_graph(graph_path)
-    nx.write_graphml(original_graph, "graph.graphml") ######
+    # original_graph = load_complete_graph(graph_path)
+    # nx.write_graphml(original_graph, "graph.graphml") ######
+
+    # original_graph = load_complete_graph(graph_path)
+    original_graph = nx.read_graphml("graph.graphml") ######
 
     for root, dirs, files in os.walk(sparse_trajectories):
         print("Impute the trajectories in folder {}".format(root))
