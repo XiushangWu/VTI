@@ -19,7 +19,7 @@ import time
 import concurrent.futures
 from pathlib import Path
 
-from utils_v2 import adjust_edge_weights_for_draught_v2
+from utils_v2 import adjust_edge_weights_for_draught_v2, plot_tra, plot_tra_with_start_end
 
 LOG_PATH = 'imputation_log.txt'
 IMPUTATION_OUTPUT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data//output_imputation')
@@ -194,7 +194,8 @@ def add_nodes_and_edges(G, trajectory_points, edge_dist_threshold):
             longitude = data['longitude']
             node_positions.append((latitude, longitude))
         else:
-            print('no latitude or longitude' + data)
+            print('no latitude or longitude')
+            print(data)
     node_positions = np.array(node_positions)
 
     tree = cKDTree(node_positions)
@@ -236,6 +237,13 @@ def find_and_impute_paths(G, trajectory_points, file_name, node_dist_threshold, 
     start_time = time.time()
     imputed_paths = []
 
+    points = []
+    for i in range(len(trajectory_points)):
+        start_props = trajectory_points[i]["properties"]
+        start_point = (start_props["latitude"], start_props["longitude"])
+        points.append(start_point)
+    plot_tra(points, 'raw data')
+
     for i in range(len(trajectory_points) - 1):
 
         start_props = trajectory_points[i]["properties"]
@@ -250,18 +258,24 @@ def find_and_impute_paths(G, trajectory_points, file_name, node_dist_threshold, 
         if direct_path_exists:
             path = [start_point, end_point]
             imputed_paths.append(path)
-        elif distance < node_dist_threshold:
+        elif distance < 0.080:
             imputed_paths.append([start_point, end_point])
         else :
             try:
                 start_draught = start_props["draught"]
-                GG = adjust_edge_weights_for_draught_v2(G, trajectory_points[i], trajectory_points[i + 1], tree, node_positions, start_draught)
+                GG = adjust_edge_weights_for_draught_v2(G, trajectory_points[i], trajectory_points[i + 1], tree, node_positions, start_draught, edge_dist_threshold)
                 path = nx.astar_path(GG, start_point, end_point, heuristic=heuristics, weight='weight')
+                plot_tra_with_start_end(start_point, end_point, path, 'imputed single')
                 imputed_paths.append(path)
             except nx.NetworkXNoPath:
+                print("no path")
                 path = [start_point, end_point]
                 imputed_paths.append(path)
-                
+    imputed_points = []
+    for p in imputed_paths:
+        imputed_points.append((p[0]))
+        imputed_points.append((p[1]))
+    plot_tra(imputed_points, 'imputed_points')
     end_time = time.time()
     execution_time = end_time - start_time 
     print(f"Imputation took: {add_execution_time + execution_time} \n")

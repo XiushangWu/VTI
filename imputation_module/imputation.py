@@ -254,8 +254,16 @@ def find_and_impute_paths(G, trajectory_points, file_name, node_dist_threshold, 
                 imputed_paths.append(path)
             except nx.NetworkXNoPath:
                 path = [start_point, end_point]
-                imputed_paths.append(path)
-                
+
+
+
+
+
+
+
+
+
+
     end_time = time.time()
     execution_time = end_time - start_time 
     print(f"Imputation took: {add_execution_time + execution_time} \n")

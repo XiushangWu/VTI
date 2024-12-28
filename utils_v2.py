@@ -1,9 +1,35 @@
 import numpy as np
 import math
+
 from utils import haversine_distance
 
+def plot_tra(points, title):
+    import matplotlib.pyplot as plt
+    return
+    # lats, lons = zip(*points)
+    # plt.plot(lons, lats, marker='o', linestyle='', markersize=2)
+    # #plt.scatter([start_lon, end_lon], [start_lat, end_lat], color='red')  # 起点和终点
+    # #plt.scatter([control_point1[1], control_point2[1]], [control_point1[0], control_point2[0]], color='green')  # 控制点
+    # plt.title(title)
+    # plt.xlabel("Longitude")
+    # plt.ylabel("Latitude")
+    # plt.grid()
+    # plt.show()
 
-def adjust_edge_weights_for_draught_v2(G, start_trajectory_point, end_trajectory_point, tree, node_positions, start_draught, base_penalty=1000):
+def plot_tra_with_start_end(start, end, points, title):
+    import matplotlib.pyplot as plt
+    return
+    # lats, lons = zip(*points)
+    # plt.plot(lons, lats, marker='o', linestyle='', markersize=2)
+    # plt.scatter([start[1], end[1]], [start[0], end[0]], color='red')  # 起点和终点
+    # # plt.scatter([control_point1[1], control_point2[1]], [control_point1[0], control_point2[0]], color='green')  # 控制点
+    # plt.title(title)
+    # plt.xlabel("Longitude")
+    # plt.ylabel("Latitude")
+    # plt.grid()
+    # plt.show()
+
+def adjust_edge_weights_for_draught_v2(G, start_trajectory_point, end_trajectory_point, tree, node_positions, start_draught, edge_dist_threshold, base_penalty=1000):
     start_props = start_trajectory_point["properties"]
     start_lat, start_lon = start_props["latitude"], start_props["longitude"]
     start_bearing = start_props["cog"]
@@ -17,13 +43,14 @@ def adjust_edge_weights_for_draught_v2(G, start_trajectory_point, end_trajectory
     end_speed = start_props["sog"]
 
     trajectory = pre_curve_generate(start_trajectory_point, end_trajectory_point)
+    plot_tra_with_start_end([start_lat, start_lon], [end_lat, end_lon], trajectory, 'curve_generate')
 
     radius = haversine_distance(start_lat, start_lon, end_lat, end_lon)
     radiusNew = 50
 
     valid_nodes = set()
     for p in trajectory:
-        start_indices_within_radius = tree.query_ball_point([p[0], p[1]], radiusNew)
+        start_indices_within_radius = tree.query_ball_point([p[0], p[1]], edge_dist_threshold * 2)
         #end_indices_within_radius = tree.query_ball_point([end_point[0], end_point[1]], radiusNew)
 
         start_nodes_within = set([list(G.nodes)[i] for i in start_indices_within_radius])
@@ -32,9 +59,12 @@ def adjust_edge_weights_for_draught_v2(G, start_trajectory_point, end_trajectory
         #relevant_nodes = start_nodes_within.union(end_nodes_within)
         relevant_nodes = start_nodes_within
         for node in relevant_nodes:
-            node_depth = abs(G.nodes[node].get('avg_depth', G.nodes[node].get('draught')))
-            if node_depth >= start_draught * 1.2:
-                valid_nodes.add(node)
+            if G.nodes[node].get('avg_depth') is None and G.nodes[node].get('draught') is None:
+                pass
+            else:
+                node_depth = abs(G.nodes[node].get('avg_depth', G.nodes[node].get('draught')))
+                if node_depth >= start_draught * 1.2:
+                    valid_nodes.add(node)
 
     valid_nodes.add((start_lat, start_lon))
     valid_nodes.add((end_lat, end_lon))
@@ -47,14 +77,14 @@ def pre_curve_generate(start_point, end_point):
     start_props = start_point["properties"]
     start_lat, start_lon = start_props["latitude"], start_props["longitude"]
     start_bearing = start_props["cog"]
-    start_ts = start_point["timestamp"]
+    start_ts = start_props["timestamp"]
     start_speed = start_props["sog"]
 
     end_props = end_point["properties"]
     end_lat, end_lon = end_props["latitude"], end_props["longitude"]
     end_bearing = end_props["cog"] - 180
-    end_ts = end_point["timestamp"]
-    end_speed = start_props["sog"]
+    end_ts = end_props["timestamp"]
+    end_speed = end_props["sog"]
 
     # 海里转m/s单位
     mean_speed = (start_speed + end_speed) / 2 * 0.514444
@@ -63,6 +93,7 @@ def pre_curve_generate(start_point, end_point):
     control_point1 = offset_point(start_lat, start_lon, total_distance * 0.25, start_bearing)
     control_point2 = offset_point(end_lat, end_lon, total_distance * 0.25, end_bearing)
     trajectory = bezier_curve((start_lat, start_lon), control_point1, control_point2, (end_lat, end_lon), n_points=100)
+    trajectory = smooth_points_with_distance(trajectory)
     return trajectory
 
 def bezier_curve(p0, p1, p2, p3, n_points=100):
@@ -87,6 +118,38 @@ def bezier_curve(p0, p1, p2, p3, n_points=100):
         curve.append((x, y))
     return curve
 
+def smooth_points_with_distance(curve, max_distance=80):
+    from geopy.distance import geodesic
+    """
+    根据目标距离平滑生成均匀分布的点。
+
+    参数:
+        points (List[Tuple[float, float]]): 输入轨迹点 (lat, lon)
+        target_distance (float): 相邻点之间的目标距离（米）
+
+    返回:
+        List[Tuple[float, float]]: 平滑后的轨迹点
+    """
+    smoothed_curve = [curve[0]]  # 初始化平滑曲线，起点作为第一个点
+
+    for i in range(1, len(curve)):
+        prev_point = smoothed_curve[-1]
+        current_point = curve[i]
+
+        # 计算当前点与上一点之间的距离
+        distance = geodesic(prev_point, current_point).meters
+
+        if distance > max_distance:
+            # 插值点数量
+            num_intermediate_points = int(np.ceil(distance / max_distance))
+            for j in range(1, num_intermediate_points + 1):
+                lat = prev_point[0] + (current_point[0] - prev_point[0]) * j / num_intermediate_points
+                lon = prev_point[1] + (current_point[1] - prev_point[1]) * j / num_intermediate_points
+                smoothed_curve.append((lat, lon))
+        else:
+            smoothed_curve.append(current_point)
+
+    return smoothed_curve
 
 def offset_point(lat, lon, distance, bearing):
     """
