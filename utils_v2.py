@@ -92,8 +92,8 @@ def pre_curve_generate(start_point, end_point):
 
     control_point1 = offset_point(start_lat, start_lon, total_distance * 0.25, start_bearing)
     control_point2 = offset_point(end_lat, end_lon, total_distance * 0.25, end_bearing)
-    trajectory = bezier_curve((start_lat, start_lon), control_point1, control_point2, (end_lat, end_lon), n_points=100)
-    trajectory = smooth_points_with_distance(trajectory)
+    trajectory = bezier_curve((start_lat, start_lon), control_point1, control_point2, (end_lat, end_lon), n_points=150)
+    #trajectory = smooth_points_with_distance(trajectory)
     return trajectory
 
 def bezier_curve(p0, p1, p2, p3, n_points=100):

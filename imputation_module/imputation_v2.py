@@ -338,10 +338,11 @@ def load_intersecting_graphs_and_impute_trajectory(file_name, file_path, graphs,
         logging.warning(f'Error occurred trying to retrieve trajectory to impute: {repr(e)}')
 
     relevant_cell_ids = find_relevant_cells(trajectory_points, cells_df)
-    
+    print("relevant_cell_ids", relevant_cell_ids)
     for cell_id in relevant_cell_ids:
         node_path = os.path.join(GRAPH_OUTPUT, f"{graphs}//{cell_id}//nodes.geojson")
         edge_path = os.path.join(GRAPH_OUTPUT, f"{graphs}//{cell_id}//edges.geojson")
+        print("read graph", node_path)
         G_cell = create_graph_from_geojson(node_path, edge_path)
         G = merge_graphs(G, G_cell)
     
