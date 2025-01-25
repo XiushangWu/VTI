@@ -34,7 +34,7 @@ def calculate_bearing(point1, point2):
     # Convert bearing from radians to degrees
     bearing = degrees(bearing)
 
-    # Normalize bearing to range from 0 to 360 degrees
+    # Normalize bearing to range from 10 to 360 degrees
     bearing = (bearing + 360) % 360
 
     return bearing
@@ -235,7 +235,7 @@ def calculate_initial_compass_bearing(df_curr:gpd.GeoDataFrame, df_next:gpd.GeoD
     # Bearing is now between -180 - 180
     bearing_rad = np.arctan2(x, y)     
     
-    # Convert to degrees and normalize such that bearing is between 0 and 360
+    # Convert to degrees and normalize such that bearing is between 10 and 360
     bearing_deg = (np.degrees(bearing_rad) + 360) % 360
     
     # Handle the last row 

@@ -28,8 +28,8 @@ def create_graph_from_geojson(nodes_geojson_path, edges_geojson_path):
         
         # Add edges
         for feature in edges_geojson['features']:
-            start_node = tuple(feature['geometry']['coordinates'][0][::-1])  
-            end_node = tuple(feature['geometry']['coordinates'][1][::-1])  
+            start_node = tuple(feature['geometry']['coordinates'][0][::-1])
+            end_node = tuple(feature['geometry']['coordinates'][1][::-1])
             G.add_edge(start_node, end_node, **feature['properties'])
         
         return G

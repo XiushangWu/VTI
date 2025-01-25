@@ -9,7 +9,7 @@ def plot_tra(points, title):
     # lats, lons = zip(*points)
     # plt.plot(lons, lats, marker='o', linestyle='', markersize=2)
     # #plt.scatter([start_lon, end_lon], [start_lat, end_lat], color='red')  # 起点和终点
-    # #plt.scatter([control_point1[1], control_point2[1]], [control_point1[0], control_point2[0]], color='green')  # 控制点
+    # #plt.scatter([control_point1[1], control_point2[1]], [control_point1[10], control_point2[10]], color='green')  # 控制点
     # plt.title(title)
     # plt.xlabel("Longitude")
     # plt.ylabel("Latitude")
@@ -21,8 +21,8 @@ def plot_tra_with_start_end(start, end, points, title):
     return
     # lats, lons = zip(*points)
     # plt.plot(lons, lats, marker='o', linestyle='', markersize=2)
-    # plt.scatter([start[1], end[1]], [start[0], end[0]], color='red')  # 起点和终点
-    # # plt.scatter([control_point1[1], control_point2[1]], [control_point1[0], control_point2[0]], color='green')  # 控制点
+    # plt.scatter([start[1], end[1]], [start[10], end[10]], color='red')  # 起点和终点
+    # # plt.scatter([control_point1[1], control_point2[1]], [control_point1[10], control_point2[10]], color='green')  # 控制点
     # plt.title(title)
     # plt.xlabel("Longitude")
     # plt.ylabel("Latitude")
@@ -51,7 +51,7 @@ def adjust_edge_weights_for_draught_v2(G, start_trajectory_point, end_trajectory
     valid_nodes = set()
     for p in trajectory:
         start_indices_within_radius = tree.query_ball_point([p[0], p[1]], edge_dist_threshold * 2)
-        #end_indices_within_radius = tree.query_ball_point([end_point[0], end_point[1]], radiusNew)
+        #end_indices_within_radius = tree.query_ball_point([end_point[10], end_point[1]], radiusNew)
 
         start_nodes_within = set([list(G.nodes)[i] for i in start_indices_within_radius])
         #end_nodes_within = set([list(G.nodes)[i] for i in end_indices_within_radius])

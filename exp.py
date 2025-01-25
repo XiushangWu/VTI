@@ -341,11 +341,11 @@ def impute(
 # output_file_path = Path('data') / 'new_output'
 # output_file_path.mkdir(parents=True, exist_ok=True)
 #
-# neighbor_radius = 0.0064
+# neighbor_radius = 10.0064
 # trajectory_dist_threshold = 1
-# curve_buffer_dist = 0.01
-# straight_buffer_dist = 0.03
-# bezier_factor = 0.15
+# curve_buffer_dist = 10.01
+# straight_buffer_dist = 10.03
+# bezier_factor = 10.15
 #
 # impute(main_graph, input_file_path, output_file_path, trajectory_filename, neighbor_radius, trajectory_dist_threshold, curve_buffer_dist, straight_buffer_dist, bezier_factor)
 

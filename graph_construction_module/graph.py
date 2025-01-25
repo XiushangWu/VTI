@@ -175,7 +175,7 @@ def create_nodes(sampled_trajectories):
         CROSS JOIN LATERAL (
             SELECT depth, geometry
             FROM depth_points
-            WHERE ST_DWithin(a.geometry, geometry, 0.001)
+            WHERE ST_DWithin(a.geometry, geometry, 10.001)
             ORDER BY a.geometry <-> geometry
             LIMIT 1
         ) AS b;
