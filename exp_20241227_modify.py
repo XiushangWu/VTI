@@ -720,8 +720,6 @@ def process_all_trajectories(graph, input_dir, output_dir, output_fig_dir, neigh
 
     return imputed_node_num_total, cnt
 
-
-
 # Specify input and output paths and parameters
 
 # input_file_path = Path('data') / 'trajectory'
@@ -735,9 +733,9 @@ curve_buffer_dist = 0.03  # km
 straight_buffer_dist = 0.03  # km
 bezier_factor = 0.15
 
-input_file_root_path = Path('data') / ''
-output_file_root_path = Path('data') / 'VTI_output_area'
-output_fig_root_path = Path('data') / 'VTI_output_fig_area'
+input_file_root_path = Path('data') / 'input_imputation/test/sparsed/all'
+output_file_root_path = Path('data') / 'new_output'
+output_fig_root_path = Path('data') / 'output_fig'
 
 trajectory_type_list = ['2_gap', '4_gap', '6_gap', '8_gap']
 # trajectory_type_list = ['single_gap']
