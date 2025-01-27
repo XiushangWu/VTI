@@ -587,7 +587,7 @@ def generate_output_files_for_nodes(
         "properties": None
     } for node in nodes]
     # .fgb is faster than .geojson
-    gpd.GeoDataFrame.from_features(node_features).to_file(file_path.with_suffix('.csv'))
+    gpd.GeoDataFrame.from_features(node_features).to_file(file_path.with_suffix('.fgb'))
 
 
 @time_function
@@ -629,6 +629,8 @@ def impute(
 
     generate_output_files_for_nodes(list(input_nodes), graph, updated_output_path / 'input_nodes')
     generate_output_files_for_nodes(list(imputed_nodes), graph, updated_output_path / 'imputed_nodes')
+    generate_output_files_for_nodes(list(path), graph, updated_output_path / 'imputed_final_nodes')
+
     # generate_output_files_for_nodes(list(auxiliary_nodes), graph, updated_output_path / 'auxiliary_nodes')
     # edges = [[(path[i]), list(path[i + 1])] for i in range(len(path) - 1)]
     # generate_output_files_for_edges(edges, updated_output_path / 'edges')
@@ -746,8 +748,8 @@ output_file_path.mkdir(parents=True, exist_ok=True)
 input_file_root_path = Path('data') / 'input_imputation/test/sparsed_exam/all'
 output_file_root_path = Path('data') / 'new_output'
 output_fig_root_path = Path('data') / 'output_fig'
-trajectory_type_list = ['2gap_05km', '2gap_10km', '2gap_15km', '2gap_20km']
-# trajectory_type_list = ['many_gap', 'single_gap']
+#trajectory_type_list = ['2gap_05km', '2gap_10km', '2gap_15km', '2gap_20km']
+trajectory_type_list = ['many_gap', 'single_gap']
 
 random.seed(42)
 for trajectory_type in trajectory_type_list:
