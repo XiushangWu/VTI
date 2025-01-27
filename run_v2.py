@@ -68,7 +68,6 @@ def load_complete_graph(graph_path):
     return G
 
 def load_all_graph_process_trajectories(type, size, sparse_trajectories, graph_path, node_dist_threshold, edge_dist_threshold, cog_angle_threshold):
-
     original_graph = load_complete_graph(graph_path)
     # nx.write_graphml(original_graph, "graph.graphml") ######
 

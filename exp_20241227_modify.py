@@ -349,7 +349,6 @@ def generate_curve_polygon(start: dict, end: dict, buffer_dist: float, total_dis
 
     return buffered_area
 
-
 def generate_straight_polygon(start_node: dict, end_node: dict, width: float) -> Polygon:
     line = LineString([start_node['xy'][::], end_node['xy'][::]])
     # bearing = Geodesic.WGS84.Inverse(start_node['latitude'], start_node['longitude'], end_node['latitude'], end_node['longitude'])['azi1']
@@ -588,7 +587,7 @@ def generate_output_files_for_nodes(
         "properties": None
     } for node in nodes]
     # .fgb is faster than .geojson
-    gpd.GeoDataFrame.from_features(node_features).to_file(file_path.with_suffix('.fgb'))
+    gpd.GeoDataFrame.from_features(node_features).to_file(file_path.with_suffix('.csv'))
 
 
 @time_function
@@ -630,9 +629,9 @@ def impute(
 
     generate_output_files_for_nodes(list(input_nodes), graph, updated_output_path / 'input_nodes')
     generate_output_files_for_nodes(list(imputed_nodes), graph, updated_output_path / 'imputed_nodes')
-    generate_output_files_for_nodes(list(auxiliary_nodes), graph, updated_output_path / 'auxiliary_nodes')
-    edges = [[(path[i]), list(path[i + 1])] for i in range(len(path) - 1)]
-    generate_output_files_for_edges(edges, updated_output_path / 'edges')
+    # generate_output_files_for_nodes(list(auxiliary_nodes), graph, updated_output_path / 'auxiliary_nodes')
+    # edges = [[(path[i]), list(path[i + 1])] for i in range(len(path) - 1)]
+    # generate_output_files_for_edges(edges, updated_output_path / 'edges')
 
     # remove added nodes to keep main graph clean
     graph.remove_nodes_from(to_be_removed_nodes)
@@ -733,12 +732,22 @@ curve_buffer_dist = 0.03  # km
 straight_buffer_dist = 0.03  # km
 bezier_factor = 0.15
 
-input_file_root_path = Path('data') / 'input_imputation/test/sparsed/all'
+input_file_path = Path('data') / '10_trajectory'
+output_file_path = Path('data') / 'new_output'
+output_file_path.mkdir(parents=True, exist_ok=True)
+# input_file_root_path = Path('data') / 'input_imputation/test/sparsed/all'
+# input_file_root_path = Path('data') / '10_trajectory'
+# trajectory_type_list = ['single_gap']
+# output_file_root_path = Path('data') / 'new_output'
+# output_fig_root_path = Path('data') / 'output_fig'
+
+
+
+input_file_root_path = Path('data') / 'input_imputation/test/sparsed_exam/all'
 output_file_root_path = Path('data') / 'new_output'
 output_fig_root_path = Path('data') / 'output_fig'
-
-trajectory_type_list = ['2_gap', '4_gap', '6_gap', '8_gap']
-# trajectory_type_list = ['single_gap']
+trajectory_type_list = ['2gap_05km', '2gap_10km', '2gap_15km', '2gap_20km']
+# trajectory_type_list = ['many_gap', 'single_gap']
 
 random.seed(42)
 for trajectory_type in trajectory_type_list:
@@ -819,5 +828,12 @@ for trajectory_type in trajectory_type_list:
                         imputed_node_num_total = imputed_node_num_total + imputed_node_num
                 end_time = time.time()
                 elapsed_time = end_time - start_time
-                print(f"程序运行时间 mean:{hole_path} : {elapsed_time / cnt} 秒")
-                print(f"impute node num mean:{hole_path} : {imputed_node_num_total / cnt}")
+                end_time = time.time()
+                elapsed_time = end_time - start_time
+                if cnt > 0:
+                    print(f"程序运行时间 mean:{hole_path} : {elapsed_time / cnt} 秒")
+                    print(f"impute node num mean:{hole_path} : {imputed_node_num_total / cnt}")
+                else:
+                    print(f"No trajectories were processed for {hole_path}.")
+                # print(f"程序运行时间 mean:{hole_path} : {elapsed_time / (cnt)} 秒")
+                # print(f"impute node num mean:{hole_path} : {imputed_node_num_total / cnt}")
